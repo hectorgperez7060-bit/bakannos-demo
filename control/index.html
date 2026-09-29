@@ -35,7 +35,7 @@ header{padding:18px 16px 10px;max-width:760px;margin:0 auto}
 .brand{font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1}
 .brand span{color:var(--accent)}
 .sub{color:var(--mute);font-size:13px;margin-top:4px}
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--bh,0px));z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:760px;margin:0 auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer}
@@ -83,11 +83,42 @@ input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:
 .note{font-size:13px;color:var(--mute);margin:8px 2px}
 .pos{color:var(--lime)} .neg{color:var(--warn)}
 .ing{font-size:13px;color:var(--mute);margin-top:4px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:#12B5A6;color:#032B27;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;padding:6px 12px}
+.topbar .txt{flex:1;text-align:center}
+.back{flex:none;display:none;align-items:center;gap:4px;background:#032B27;color:#EAFBF8;font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px;text-decoration:none}
+.back.on{display:inline-flex}
+.gate{position:fixed;inset:0;z-index:50;background:#14100C;color:#F7EFE6;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.gatebox{width:100%;max-width:340px;text-align:center}
+.gbrand{font-weight:800;font-size:26px;letter-spacing:-.02em}
+.gbrand span{color:#FF7A1A}
+.gtitle{font-weight:800;font-size:20px;margin-top:18px}
+.gnote{color:#B0A292;font-size:13.5px;margin:8px 0 0;line-height:1.5}
+.gate label{color:#B0A292;text-align:left;margin-top:22px}
+.gate input{background:#211A14;border-color:#3A2F25;color:#F7EFE6;text-align:center;letter-spacing:.4em;font-size:20px}
+.gate .back{margin-top:20px}
+.gerr{color:#FF8A80;font-size:14px;font-weight:600;min-height:20px;margin-top:10px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="demo">Demo · datos de ejemplo, se guardan solo en este dispositivo · <a href="../">volver</a></div>
+<div id="gate" class="gate">
+  <div class="gatebox">
+    <div class="gbrand">Tragos <span>Bakanno's</span></div>
+    <div class="gtitle">Centro de control</div>
+    <p class="gnote">Uso interno del local. La carta que ven los clientes no lleva a esta pantalla.</p>
+    <label for="pin">Clave de acceso</label>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="4 dígitos" onkeydown="if(event.key==='Enter')tryPin()">
+    <button class="btn" onclick="tryPin()">Entrar</button>
+    <div id="gerr" class="gerr"></div>
+    <p class="gnote">Demo: la clave es <b>2022</b>. En la versión real cada persona del local tiene su usuario y queda registrado quién carga cada cosa.</p>
+    <a class="back" id="back1" href="../presentacion/">← Volver a la demo</a>
+  </div>
+</div>
+<div id="app" hidden>
+<div class="topbar">
+  <a class="back" id="back2" href="../presentacion/">← Volver</a>
+  <span class="txt">Uso interno · datos de ejemplo</span>
+</div>
 <header>
   <div class="brand">Tragos <span>Bakanno's</span></div>
   <div class="sub">Cocteleria de barrio · San Antonio 1455, Merlo · <b>Demo</b></div>
@@ -95,7 +126,33 @@ input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:
 <nav><div class="tabs" id="tabs" role="tablist"></div></nav>
 <main id="view"></main>
 <div id="toast" role="status" aria-live="polite"></div>
+</div>
 
+<script>
+const PIN='2022';
+let demoMode=false;
+try{
+  if(new URLSearchParams(location.search).get('demo')==='1'){sessionStorage.setItem('bakannos_demo','1')}
+  demoMode=sessionStorage.getItem('bakannos_demo')==='1';
+}catch(e){demoMode=new URLSearchParams(location.search).get('demo')==='1'}
+if(demoMode){document.getElementById('back1').classList.add('on')}
+function fitBar(){
+  const b=document.querySelector('.topbar');
+  if(b)document.documentElement.style.setProperty('--bh',b.offsetHeight+'px');
+}
+function openApp(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').hidden=false;
+  if(demoMode)document.getElementById('back2').classList.add('on');
+  render();fitBar();
+}
+function tryPin(){
+  const v=document.getElementById('pin').value.trim();
+  if(v===PIN){try{sessionStorage.setItem('bakannos_ok','1')}catch(e){}openApp()}
+  else{document.getElementById('gerr').textContent='Clave incorrecta';document.getElementById('pin').value=''}
+}
+addEventListener('resize',fitBar);
+</script>
 <script>
 const KEY='bakannos_control_v1';
 const CHANNELS=['Salón','Mesa','Delivery','Eventos','Personal'];
@@ -385,7 +442,9 @@ function render(){
   document.getElementById('tabs').innerHTML=TABS.map(function(x){return `<button class="tab" role="tab" aria-selected="${x[0]===tab}" onclick="setTab('${x[0]}')">${x[1]}</button>`}).join('');
   document.getElementById('view').innerHTML=(VIEWS[tab]||vResumen)();
 }
-render();
+let yaEntro=false;
+try{yaEntro=sessionStorage.getItem('bakannos_ok')==='1'}catch(e){}
+if(yaEntro)openApp();else document.getElementById('pin').focus();
 </script>
 </body>
 </html>

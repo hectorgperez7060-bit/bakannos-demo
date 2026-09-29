@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tragos Bakanno's · Demo</title>
+<meta name="description" content="Demo de carta online con pedidos por WhatsApp y panel de control de ventas, stock y caja para Tragos Bakanno's.">
+<meta property="og:title" content="Tragos Bakanno's · Demo">
+<meta property="og:description" content="Carta online con pedidos por WhatsApp + panel de ventas, stock y caja. Demo sin compromiso.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF4EE; --card:#FFFFFF; --ink:#1E1712; --mute:#786A5C; --line:#EADFD3;
+  --orange:#E4570F; --orange-ink:#FFFFFF; --black:#14100C; --teal:#12B5A6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#14100C;--card:#211A14;--ink:#F7EFE6;--mute:#B0A292;--line:#3A2F25;--orange:#FF7A1A;--orange-ink:#1A0C02;--black:#0C0906}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.demo{background:var(--teal);color:#032B27;font-size:13px;font-weight:500;text-align:center;padding:6px 12px}
+.hero{background:var(--black);color:#fff;padding:30px 18px 26px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#FF7A1A,#E4570F 60%,transparent 62%);opacity:.9}
+.hero>*{position:relative;z-index:1}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
+.logo{font-family:'Anton',Impact,'Arial Narrow',sans-serif;font-size:52px;line-height:.95;text-transform:uppercase;color:#FF7A1A;margin:0;transform:rotate(-2deg);transform-origin:left;text-shadow:3px 3px 0 #000}
+.tag{font-family:'Anton',Impact,sans-serif;font-size:20px;text-transform:uppercase;margin:12px 0 0;color:#fff}
+.lead{margin:12px 0 0;font-size:15px;color:#D7C9BA;max-width:52ch}
+.proof{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.proof span{font-size:12.5px;font-weight:700;color:#FFD9B8;border:1px solid rgba(255,122,26,.5);border-radius:999px;padding:4px 11px}
+h2{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:26px;margin:28px 0 4px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+.cards{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:620px){.cards{grid-template-columns:1fr 1fr}}
+.c{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;text-decoration:none;color:inherit}
+.c .n{font-family:'Anton',Impact,sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
+.c .t{font-weight:700;font-size:20px;margin:6px 0 0}
+.c .d{color:var(--mute);font-size:14.5px;margin:8px 0 0}
+.c ul{margin:12px 0 0;padding-left:18px;color:var(--mute);font-size:14px}
+.c ul li{margin:4px 0}
+.go{margin-top:16px;display:inline-block;align-self:flex-start;background:var(--orange);color:var(--orange-ink);font-weight:700;padding:12px 22px;border-radius:999px;text-decoration:none}
+.c:hover .go,.c:focus-visible .go{filter:brightness(1.08)}
+a:focus-visible,.c:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:20px;font-size:14.5px;color:var(--mute)}
+.note b{color:var(--ink)}
+.ft{padding:26px 16px 40px;text-align:center;color:var(--mute);font-size:13px}
+.ft a{color:var(--orange)}
+</style>
+</head>
+<body>
+<div class="demo">Demo de trabajo · los productos, precios y datos son de ejemplo</div>
+
+<header class="hero"><div class="wrap">
+  <h1 class="logo">Bakanno's</h1>
+  <p class="tag">Cocteleria de barrio · Merlo</p>
+  <p class="proof"><span>Desde 2022</span><span>4,9 ★ en Google</span><span>8.600 seguidores</span></p>
+  <p class="lead">Dos herramientas separadas: una la ve el cliente, la otra es solo del local. Se abren en el navegador del celular, sin instalar nada.</p>
+</div></header>
+
+<main class="wrap">
+  <h2>Las dos partes</h2>
+  <p class="sub">Tocá cualquiera para probarla. Funcionan de verdad, y cada una tiene botón para volver acá.</p>
+
+  <div class="cards">
+    <a class="c" href="../?demo=1">
+      <span class="n">Pública · la ve cualquiera</span>
+      <span class="t">Tienda online</span>
+      <span class="d">La carta completa con precios y carrito. El pedido sale armado por WhatsApp. Esto es lo que se comparte en Instagram.</span>
+      <ul>
+        <li>Clásicos, frutales, cremosos y baldes</li>
+        <li>Ramos de tragos para regalar</li>
+        <li>Carrito con delivery o retiro</li>
+        <li>Calculadora de eventos</li>
+      </ul>
+      <span class="go">Ver la carta</span>
+    </a>
+
+    <a class="c" href="../control/?demo=1">
+      <span class="n">Privada · con clave</span>
+      <span class="t">Centro de control</span>
+      <span class="d">Todo vigilado en un solo lugar: qué entra, qué sale, cuánto queda y si la caja cierra. Cada venta descuenta los insumos según la receta.</span>
+      <ul>
+        <li>Si el día dio ganancia o pérdida</li>
+        <li>Stock con alertas de reposición y ajuste por conteo</li>
+        <li>Costo y margen real de cada trago</li>
+        <li>Cobrado en efectivo, tarjeta y transferencia</li>
+        <li>Cierre de caja: si falta plata, lo marca</li>
+      </ul>
+      <span class="go">Abrir con clave 2022</span>
+    </a>
+  </div>
+
+  <div class="note">
+    <b>El cliente nunca ve el control.</b> Son dos direcciones distintas. La tienda se comparte libremente; el centro de control pide clave y no hay ningún botón en la tienda que lleve hasta él. Más adelante se conectan por atrás: el pedido que entra por la tienda cae solo en el control y descuenta el stock, sin que el que compra vea nada de eso.
+  </div>
+
+  <div class="note">
+    <b>Cómo leer esta demo.</b> Los tragos, precios y números son de ejemplo, puestos para que se entienda cómo funciona. La versión real se arma con las fotos, la carta y los precios de ustedes, conectada al WhatsApp del local. Tocar todo lo que quieran: el panel guarda solo en su propio celular y se vuelve atrás con “Restablecer datos de ejemplo”.
+  </div>
+</main>
+
+<div class="ft">
+  Demo preparada por <b>Gabriel — estrategia y desarrollo digital</b><br>
+  <a href="mailto:gabriel.precencia.digital@gmail.com">gabriel.precencia.digital@gmail.com</a><br><br>
+  Beber con moderación. Prohibida la venta de alcohol a menores de 18 años.
+</div>
+</body>
+</html>

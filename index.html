@@ -3,104 +3,262 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tragos Bakanno's · Demo</title>
-<meta name="description" content="Demo de carta online con pedidos por WhatsApp y panel de control de ventas, stock y caja para Tragos Bakanno's.">
-<meta property="og:title" content="Tragos Bakanno's · Demo">
-<meta property="og:description" content="Carta online con pedidos por WhatsApp + panel de ventas, stock y caja. Demo sin compromiso.">
-<meta property="og:type" content="website">
+<title>Tragos Bakanno's · Pedí online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#FAF4EE; --card:#FFFFFF; --ink:#1E1712; --mute:#786A5C; --line:#EADFD3;
-  --orange:#E4570F; --orange-ink:#FFFFFF; --black:#14100C; --teal:#12B5A6;
+  --orange:#E4570F; --orange-ink:#FFFFFF; --black:#14100C; --teal:#12B5A6; --ok:#2E7D32;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
-  :root{--bg:#14100C;--card:#211A14;--ink:#F7EFE6;--mute:#B0A292;--line:#3A2F25;--orange:#FF7A1A;--orange-ink:#1A0C02;--black:#0C0906}
+  :root:not([data-theme="light"]){--bg:#14100C;--card:#211A14;--ink:#F7EFE6;--mute:#B0A292;--line:#3A2F25;--orange:#FF7A1A;--orange-ink:#1A0C02;--black:#0C0906;--ok:#7BD67F}
 }
+:root[data-theme="dark"]{--bg:#14100C;--card:#211A14;--ink:#F7EFE6;--mute:#B0A292;--line:#3A2F25;--orange:#FF7A1A;--orange-ink:#1A0C02;--black:#0C0906;--ok:#7BD67F}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
-.demo{background:var(--teal);color:#032B27;font-size:13px;font-weight:500;text-align:center;padding:6px 12px}
-.hero{background:var(--black);color:#fff;padding:30px 18px 26px;position:relative;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Rubik',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+.demo{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--teal);color:#032B27;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;padding:6px 12px}
+.demo .txt{flex:1;text-align:center}
+.back{flex:none;display:none;align-items:center;gap:4px;background:#032B27;color:#EAFBF8;font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px;text-decoration:none}
+.back.on{display:inline-flex}
+.hero{background:var(--black);color:#fff;padding:26px 18px 22px;position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#FF7A1A,#E4570F 60%,transparent 62%);opacity:.9}
 .hero>*{position:relative;z-index:1}
-.wrap{max-width:820px;margin:0 auto;padding:0 16px}
-.logo{font-family:'Anton',Impact,'Arial Narrow',sans-serif;font-size:52px;line-height:.95;text-transform:uppercase;color:#FF7A1A;margin:0;transform:rotate(-2deg);transform-origin:left;text-shadow:3px 3px 0 #000}
-.tag{font-family:'Anton',Impact,sans-serif;font-size:20px;text-transform:uppercase;margin:12px 0 0;color:#fff}
-.lead{margin:12px 0 0;font-size:15px;color:#D7C9BA;max-width:52ch}
-.proof{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.logo{font-family:'Anton',Impact,'Arial Narrow',sans-serif;font-size:54px;line-height:.95;letter-spacing:.01em;text-transform:uppercase;color:#FF7A1A;margin:0;transform:rotate(-2deg);transform-origin:left;text-shadow:3px 3px 0 #000}
+.tag{font-family:'Anton',Impact,sans-serif;font-size:22px;text-transform:uppercase;margin:10px 0 0;color:#fff;letter-spacing:.02em}
+.meta{margin:14px 0 0;font-size:14px;color:#D7C9BA}
+.meta b{color:#fff}
+.proof{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
 .proof span{font-size:12.5px;font-weight:700;color:#FFD9B8;border:1px solid rgba(255,122,26,.5);border-radius:999px;padding:4px 11px}
-h2{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:26px;margin:28px 0 4px}
-.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
-.cards{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:620px){.cards{grid-template-columns:1fr 1fr}}
-.c{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;text-decoration:none;color:inherit}
-.c .n{font-family:'Anton',Impact,sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
-.c .t{font-weight:700;font-size:20px;margin:6px 0 0}
-.c .d{color:var(--mute);font-size:14.5px;margin:8px 0 0}
-.c ul{margin:12px 0 0;padding-left:18px;color:var(--mute);font-size:14px}
-.c ul li{margin:4px 0}
-.go{margin-top:16px;display:inline-block;align-self:flex-start;background:var(--orange);color:var(--orange-ink);font-weight:700;padding:12px 22px;border-radius:999px;text-decoration:none}
-.c:hover .go,.c:focus-visible .go{filter:brightness(1.08)}
-a:focus-visible,.c:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
-.note{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:20px;font-size:14.5px;color:var(--mute)}
-.note b{color:var(--ink)}
-.ft{padding:26px 16px 40px;text-align:center;color:var(--mute);font-size:13px}
-.ft a{color:var(--orange)}
+.hero a.cta{display:inline-block;margin-top:16px;background:#FF7A1A;color:#1A0C02;font-weight:700;padding:12px 20px;border-radius:999px;text-decoration:none}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
+.cats{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--bh,0px));z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.cats .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+.cats .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:500;font-size:14px;padding:8px 16px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:var(--orange-ink)}
+h2{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:28px;letter-spacing:.01em;margin:26px 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
+.item{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.cup{flex:none;width:84px;height:110px;border-radius:12px;background:var(--black);display:flex;align-items:center;justify-content:center}
+.info{flex:1;min-width:0;display:flex;flex-direction:column}
+.name{font-weight:700;font-size:17px}
+.desc{color:var(--mute);font-size:13.5px;margin:2px 0 8px}
+.foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.price{font-weight:700;font-size:18px}
+.add{border:0;background:var(--orange);color:var(--orange-ink);font:inherit;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer}
+.step{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:999px}
+.step button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:20px;font-weight:700;width:36px;height:36px;cursor:pointer}
+.step span{min-width:20px;text-align:center;font-weight:700}
+.badge{display:inline-block;font-size:11px;font-weight:700;background:var(--teal);color:#032B27;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+label{display:block;font-size:13px;color:var(--mute);margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.big{font-family:'Anton',Impact,sans-serif;font-size:34px;color:var(--orange);line-height:1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0}
+.row.t{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:700;font-size:18px}
+.ft{padding:30px 16px 130px;text-align:center;color:var(--mute);font-size:13px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 40%);display:none}
+.bar.on{display:block}
+.bar button{width:100%;max-width:820px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;border:0;background:var(--orange);color:var(--orange-ink);font:inherit;font-weight:700;font-size:17px;padding:15px 20px;border-radius:16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);display:none}
+.sheet.on{display:block}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));max-width:820px;margin:0 auto}
+.panel h3{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:26px;margin:0 0 6px}
+.close{float:right;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:6px 12px;border-radius:999px;cursor:pointer}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:500;padding:11px;border-radius:12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wa{display:block;text-align:center;margin-top:16px;background:#25D366;color:#06301A;font-weight:700;padding:15px;border-radius:14px;text-decoration:none;font-size:17px}
+.wa[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.note{font-size:13px;color:var(--mute);margin-top:8px}
+.empty{color:var(--mute);text-align:center;padding:20px 0}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<div class="demo">Demo de trabajo · los productos, precios y datos son de ejemplo</div>
+<div class="demo">
+  <a class="back" id="back" href="presentacion/">← Volver</a>
+  <span class="txt">Demo · los productos y precios son de ejemplo</span>
+</div>
 
-<header class="hero"><div class="wrap">
+<header class="hero">
   <h1 class="logo">Bakanno's</h1>
-  <p class="tag">Cocteleria de barrio · Merlo</p>
-  <p class="proof"><span>Desde 2022</span><span>4,9 ★ en Google</span><span>8.600 seguidores</span></p>
-  <p class="lead">Dos piezas pensadas para el negocio: la que ve el cliente y la que usás vos adentro del local. Se abren en el navegador del celular, sin instalar nada.</p>
-</div></header>
+  <p class="tag">Cocteleria de barrio</p>
+  <p class="meta"><b>Delivery y eventos</b> · San Antonio 1455, Merlo<br>Abrimos a las 20 hs · Desde 2022</p>
+  <p class="proof"><span>4,9 ★ en Google</span><span>8.600 seguidores</span><span>Retiro y delivery</span></p>
+  <a class="cta" href="#carta">Ver la carta</a>
+</header>
 
-<main class="wrap">
-  <h2>Las dos demos</h2>
-  <p class="sub">Tocá cualquiera para probarla. Funcionan de verdad.</p>
+<div class="cats"><div class="wrap" id="cats" role="group" aria-label="Categorías"></div></div>
 
-  <div class="cards">
-    <a class="c" href="carta/">
-      <span class="n">Para el cliente</span>
-      <span class="t">Carta online y pedidos</span>
-      <span class="d">La carta completa con fotos, precios y carrito. El pedido sale armado por WhatsApp.</span>
-      <ul>
-        <li>Clásicos, frutales, cremosos y baldes</li>
-        <li>Ramos de tragos para regalar</li>
-        <li>Carrito con delivery o retiro</li>
-        <li>Calculadora de eventos</li>
-      </ul>
-      <span class="go">Ver la carta</span>
-    </a>
+<main class="wrap" id="carta">
+  <div id="menu"></div>
 
-    <a class="c" href="control/">
-      <span class="n">Para el local</span>
-      <span class="t">Panel de control</span>
-      <span class="d">Ventas, stock, costos y cierre de caja en un solo lugar. Cada venta descuenta los insumos según la receta.</span>
-      <ul>
-        <li>Resultado del día y ventas por canal</li>
-        <li>Stock con alertas de reposición</li>
-        <li>Margen por trago y cierre de caja</li>
-      </ul>
-      <span class="go">Abrir el panel</span>
-    </a>
-  </div>
-
-  <div class="note">
-    <b>Cómo leer esta demo.</b> Los tragos, precios y números son de ejemplo, puestos para que se entienda cómo funciona. La versión real se arma con las fotos, la carta y los precios de ustedes, conectada al WhatsApp del local. Tocar todo lo que quieran: el panel guarda solo en su propio celular y se vuelve atrás con “Restablecer datos de ejemplo”.
+  <h2>Eventos</h2>
+  <div class="card">
+    <div style="font-weight:700;font-size:17px">Calculá tu evento</div>
+    <div class="note" style="margin-top:2px">Estimación rápida. Te confirmamos el presupuesto final por WhatsApp.</div>
+    <label for="ev_p">Cantidad de invitados: <b id="ev_pv">30</b></label>
+    <input id="ev_p" type="range" min="10" max="150" step="5" value="30" oninput="calcEv()">
+    <label for="ev_t">Tragos por persona: <b id="ev_tv">3</b></label>
+    <input id="ev_t" type="range" min="1" max="6" step="1" value="3" oninput="calcEv()">
+    <div class="row t"><span>Total estimado</span><span class="big" id="ev_tot">$0</span></div>
+    <div class="note" id="ev_det"></div>
+    <a class="wa" id="ev_wa" href="#" target="_blank" rel="noopener">Pedir presupuesto por WhatsApp</a>
   </div>
 </main>
 
-<div class="ft">
-  Demo preparada por <b>Gabriel — estrategia y desarrollo digital</b><br>
-  <a href="mailto:gabriel.precencia.digital@gmail.com">gabriel.precencia.digital@gmail.com</a><br><br>
-  Beber con moderación. Prohibida la venta de alcohol a menores de 18 años.
+<div class="ft">Tragos Bakanno's · Cocteleria de barrio · San Antonio 1455, Merlo<br><a href="https://www.instagram.com/_tragosbakanno.s/" target="_blank" rel="noopener" style="color:var(--orange)">@_tragosbakanno.s</a><br><br>Beber con moderación. Prohibida la venta a menores de 18 años.</div>
+
+<div class="bar" id="bar"><button onclick="openCart()"><span id="bar_n">0 productos</span><span id="bar_t">$0</span></button></div>
+
+<div class="sheet" id="sheet" onclick="if(event.target===this)closeCart()">
+  <div class="panel" role="dialog" aria-modal="true" aria-label="Tu pedido">
+    <button class="close" onclick="closeCart()">Cerrar</button>
+    <h3>Tu pedido</h3>
+    <div id="lines"></div>
+    <label>¿Cómo lo recibís?</label>
+    <div class="seg" id="mode"></div>
+    <label for="f_n">Tu nombre</label><input id="f_n" oninput="upd()" autocomplete="name">
+    <div id="addrBox"><label for="f_a">Dirección de entrega</label><input id="f_a" oninput="upd()" autocomplete="street-address" placeholder="Calle, número, barrio"></div>
+    <label for="f_p">Forma de pago</label>
+    <select id="f_p" onchange="upd()"><option>Efectivo</option><option>Transferencia</option><option>Mercado Pago</option></select>
+    <div class="row t"><span>Total</span><span class="big" id="c_tot">$0</span></div>
+    <a class="wa" id="wa" href="#" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+    <div class="note" id="wa_note">Se abre WhatsApp con el pedido armado. En esta demo lo elegís vos a quién enviarlo.</div>
+  </div>
 </div>
+
+<script>
+const SHIP=1500;
+const CATS=['Todos','Clásicos','Frutales','Cremosos','Combos','Regalos'];
+const CUPS={
+  fer:['#5B2E14','#2A130A'], gin:['#DDF3EF','#9AD8CE'], vod:['#F2E6FF','#B58AE8'], moj:['#CFF2A8','#6DBB3B'],
+  ape:['#FFB36B','#F26A1B'], fru:['#FF6F91','#8E1B4A'], blu:['#5CE1F0','#1877D8'], sun:['#FFD166','#FF7A1A'],
+  cho:['#F4D9C6','#5A2F1E'], can:['#FFE7A3','#E05D5D'], bal:['#FFB36B','#F26A1B'], fie:['#FF6F91','#FF7A1A'],
+  ram:['#FF6F91','#E4570F']
+};
+const P=[
+  {id:1,c:'Clásicos',n:'Fernet con cola',d:'El de siempre, bien cargado y con hielo.',p:5500,k:'fer'},
+  {id:2,c:'Clásicos',n:'Gin tonic',d:'Gin, tónica, limón y hielo.',p:7000,k:'gin'},
+  {id:3,c:'Clásicos',n:'Vodka tonic',d:'Vodka, tónica y limón.',p:6800,k:'vod'},
+  {id:4,c:'Clásicos',n:'Mojito',d:'Ron, menta, limón y soda.',p:7800,k:'moj'},
+  {id:5,c:'Clásicos',n:'Aperol spritz',d:'Aperol, espumante y un toque de naranja.',p:7500,k:'ape'},
+  {id:6,c:'Frutales',n:'Frutal de la casa',d:'Vodka con frutos rojos.',p:6500,k:'fru',t:'Más pedido'},
+  {id:7,c:'Frutales',n:'Blue Bakanno\'s',d:'Azul, menta y frutas. El más fotografiado.',p:8000,k:'blu'},
+  {id:8,c:'Frutales',n:'Sunrise',d:'Naranja, maracuyá y un golpe de licor.',p:7200,k:'sun'},
+  {id:9,c:'Cremosos',n:'Chocolate y frutilla',d:'Cremoso, con salsa de chocolate y frutilla fresca.',p:8500,k:'cho'},
+  {id:10,c:'Cremosos',n:'Candy',d:'Cremoso con golosinas de colores.',p:8500,k:'can'},
+  {id:11,c:'Combos',n:'Balde x4 tragos',d:'Cuatro tragos a elección para compartir.',p:22000,k:'bal',t:'Ahorrás'},
+  {id:12,c:'Combos',n:'Combo Fiesta x10',d:'Diez tragos para la juntada. Avisanos los gustos.',p:52000,k:'fie',t:'Ahorrás'},
+  {id:13,c:'Regalos',n:'Ramo de tragos',d:'Cuatro tragos armados como ramo, con moño y tarjeta. Para cumpleaños y sorpresas.',p:28000,k:'ram',t:'Para regalar'},
+  {id:14,c:'Regalos',n:'Ramo grande x6',d:'Seis tragos, flores y presentación completa. Se encarga con un día de anticipación.',p:39000,k:'ram',t:'Para regalar'}
+];
+let cat='Todos', cart={}, mode='Delivery';
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-AR');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function cupSVG(k){
+  const [a,b]=CUPS[k]||CUPS.fer;
+  return `<svg viewBox="0 0 84 110" width="84" height="110" aria-hidden="true">
+  <defs><linearGradient id="g${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+  <path d="M20 30 L64 30 L58 98 Q57 102 52 102 L32 102 Q27 102 26 98 Z" fill="url(#g${k})" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
+  <ellipse cx="42" cy="30" rx="22" ry="5" fill="#fff" fill-opacity=".25"/>
+  <circle cx="34" cy="26" r="6" fill="${b}"/><circle cx="46" cy="24" r="6" fill="${a}"/><circle cx="53" cy="28" r="4" fill="${b}"/>
+  <rect x="50" y="4" width="4" height="46" rx="2" fill="#111" transform="rotate(12 52 27)"/>
+  <circle cx="42" cy="72" r="3" fill="#fff" fill-opacity=".35"/><circle cx="36" cy="82" r="2" fill="#fff" fill-opacity=".35"/><circle cx="48" cy="86" r="2.4" fill="#fff" fill-opacity=".35"/>
+  </svg>`;
+}
+function ramoSVG(){
+  return `<svg viewBox="0 0 84 110" width="84" height="110" aria-hidden="true">
+  <defs><linearGradient id="gram" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6F91"/><stop offset="1" stop-color="#E4570F"/></linearGradient></defs>
+  <path d="M26 58 L58 58 L50 100 Q49 104 44 104 L40 104 Q35 104 34 100 Z" fill="#4A3A2C" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+  <g stroke="#2A1F16" stroke-width="2" stroke-linecap="round"><path d="M42 58 L30 34"/><path d="M42 58 L54 34"/><path d="M42 58 L42 30"/></g>
+  <circle cx="28" cy="30" r="12" fill="url(#gram)"/><circle cx="56" cy="30" r="12" fill="#5CE1F0"/><circle cx="42" cy="24" r="13" fill="#FFD166"/>
+  <circle cx="28" cy="27" r="3" fill="#fff" fill-opacity=".5"/><circle cx="56" cy="27" r="3" fill="#fff" fill-opacity=".5"/><circle cx="42" cy="21" r="3" fill="#fff" fill-opacity=".5"/>
+  <path d="M30 66 Q42 60 54 66" stroke="#FF7A1A" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M42 64 L35 56 M42 64 L49 56" stroke="#FF7A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+function renderCats(){
+  document.getElementById('cats').innerHTML=CATS.map(c=>`<button class="chip" aria-pressed="${c===cat}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+function setCat(c){cat=c;renderCats();renderMenu()}
+function ctrl(p){
+  const q=cart[p.id]||0;
+  return q?`<div class="step"><button aria-label="Quitar uno" onclick="chg(${p.id},-1)">−</button><span>${q}</span><button aria-label="Agregar uno" onclick="chg(${p.id},1)">+</button></div>`
+          :`<button class="add" onclick="chg(${p.id},1)">Agregar</button>`;
+}
+function renderMenu(){
+  const cats=cat==='Todos'?CATS.slice(1):[cat];
+  document.getElementById('menu').innerHTML=cats.map(c=>`<h2>${c}</h2><div class="grid">`+P.filter(p=>p.c===c).map(p=>`
+    <div class="item"><div class="cup">${p.k==='ram'?ramoSVG():cupSVG(p.k)}</div><div class="info">
+    <div class="name">${esc(p.n)}${p.t?`<span class="badge">${p.t}</span>`:''}</div><div class="desc">${esc(p.d)}</div>
+    <div class="foot"><span class="price">${fmt(p.p)}</span><span id="ctl${p.id}">${ctrl(p)}</span></div></div></div>`).join('')+`</div>`).join('');
+}
+function chg(id,d){
+  cart[id]=Math.max(0,(cart[id]||0)+d);if(!cart[id])delete cart[id];
+  const p=P.find(x=>x.id===id),el=document.getElementById('ctl'+id);if(el)el.innerHTML=ctrl(p);
+  updBar();if(document.getElementById('sheet').classList.contains('on'))renderCart();
+}
+const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+const sub=()=>Object.entries(cart).reduce((a,[id,q])=>a+P.find(p=>p.id==id).p*q,0);
+function updBar(){
+  const n=count(),b=document.getElementById('bar');b.classList.toggle('on',n>0);
+  document.getElementById('bar_n').textContent='Ver pedido · '+n+(n===1?' producto':' productos');
+  document.getElementById('bar_t').textContent=fmt(sub());
+}
+function openCart(){renderCart();document.getElementById('sheet').classList.add('on')}
+function closeCart(){document.getElementById('sheet').classList.remove('on')}
+function setMode(m){mode=m;renderCart()}
+function renderCart(){
+  const ids=Object.keys(cart);
+  document.getElementById('lines').innerHTML=ids.length?ids.map(id=>{const p=P.find(x=>x.id==id);return `<div class="row"><div><b>${esc(p.n)}</b><div class="note" style="margin:0">${fmt(p.p)} c/u</div></div><div style="display:flex;align-items:center;gap:10px"><div class="step"><button aria-label="Quitar uno" onclick="chg(${p.id},-1)">−</button><span>${cart[id]}</span><button aria-label="Agregar uno" onclick="chg(${p.id},1)">+</button></div><b style="min-width:70px;text-align:right">${fmt(p.p*cart[id])}</b></div></div>`}).join('')
+    :'<div class="empty">Todavía no agregaste nada.</div>';
+  document.getElementById('mode').innerHTML=['Delivery','Retiro'].map(m=>`<button aria-pressed="${m===mode}" onclick="setMode('${m}')">${m==='Delivery'?'Delivery (+'+fmt(SHIP)+')':'Retiro en el local'}</button>`).join('');
+  document.getElementById('addrBox').style.display=mode==='Delivery'?'block':'none';
+  upd();
+}
+function total(){return sub()+(mode==='Delivery'&&count()?SHIP:0)}
+function upd(){
+  document.getElementById('c_tot').textContent=fmt(total());
+  const name=document.getElementById('f_n').value.trim(), addr=document.getElementById('f_a').value.trim();
+  const ok=count()>0&&name&&(mode==='Retiro'||addr);
+  const lines=Object.keys(cart).map(id=>{const p=P.find(x=>x.id==id);return `• ${cart[id]} × ${p.n} — ${fmt(p.p*cart[id])}`});
+  const msg=`Hola Bakanno's! Quiero hacer un pedido:\n\n${lines.join('\n')}\n\n${mode==='Delivery'?'Delivery a: '+addr+'\nEnvío: '+fmt(SHIP):'Retiro en el local'}\nPago: ${document.getElementById('f_p').value}\nTotal: ${fmt(total())}\nNombre: ${name}`;
+  const a=document.getElementById('wa');
+  a.href='https://wa.me/?text='+encodeURIComponent(msg);
+  a.setAttribute('aria-disabled',ok?'false':'true');
+  document.getElementById('wa_note').textContent=ok?'Se abre WhatsApp con el pedido armado. En esta demo lo elegís vos a quién enviarlo.':'Completá tu nombre'+(mode==='Delivery'?' y la dirección':'')+' para enviar el pedido.';
+}
+function calcEv(){
+  const p=+document.getElementById('ev_p').value,t=+document.getElementById('ev_t').value;
+  document.getElementById('ev_pv').textContent=p;document.getElementById('ev_tv').textContent=t;
+  const n=p*t,avg=6800,tot=n*avg*0.9;
+  document.getElementById('ev_tot').textContent=fmt(tot);
+  document.getElementById('ev_det').textContent=n+' tragos a un promedio de '+fmt(avg)+' con 10% de descuento por cantidad.';
+  const msg=`Hola Bakanno's! Quiero un presupuesto para un evento de ${p} invitados, ${t} tragos por persona (${n} tragos). Estimado de la web: ${fmt(tot)}.`;
+  document.getElementById('ev_wa').href='https://wa.me/?text='+encodeURIComponent(msg);
+}
+renderCats();renderMenu();updBar();calcEv();
+
+let demoMode=false;
+try{
+  if(new URLSearchParams(location.search).get('demo')==='1'){sessionStorage.setItem('bakannos_demo','1')}
+  demoMode=sessionStorage.getItem('bakannos_demo')==='1';
+}catch(e){demoMode=new URLSearchParams(location.search).get('demo')==='1'}
+if(demoMode)document.getElementById('back').classList.add('on');
+function fitBar(){
+  const b=document.querySelector('.demo');
+  if(b)document.documentElement.style.setProperty('--bh',b.offsetHeight+'px');
+}
+fitBar();addEventListener('resize',fitBar);
+</script>
 </body>
 </html>
