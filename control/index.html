@@ -97,6 +97,18 @@ input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:
 .gate input{background:#211A14;border-color:#3A2F25;color:#F7EFE6;text-align:center;letter-spacing:.4em;font-size:20px}
 .gate .back{margin-top:20px}
 .gerr{color:#FF8A80;font-size:14px;font-weight:600;min-height:20px;margin-top:10px}
+.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.ticket{display:none}
+@media print{
+  html,body{background:#fff!important}
+  body>*{display:none!important}
+  body>.ticket{display:block!important;width:72mm;margin:0 auto;color:#000;background:#fff;font-family:'Courier New',ui-monospace,monospace;font-size:12px;line-height:1.35}
+  .ticket h4{font-size:15px;margin:0;text-align:center;text-transform:uppercase}
+  .ticket .tc{text-align:center}
+  .ticket .tl{display:flex;justify-content:space-between;gap:8px}
+  .ticket .sep{border-top:1px dashed #000;margin:6px 0}
+  .ticket .tb{font-weight:700;font-size:14px}
+}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -127,6 +139,7 @@ input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:
 <main id="view"></main>
 <div id="toast" role="status" aria-live="polite"></div>
 </div>
+<div class="ticket" id="ticket" aria-hidden="true"></div>
 
 <script>
 const PIN='2022';
@@ -158,6 +171,7 @@ const KEY='bakannos_control_v1';
 const CHANNELS=['Salón','Mesa','Delivery','Eventos','Personal'];
 const PAYS=['Efectivo','Tarjeta','Transferencia'];
 const CATS=['Sueldos','Alquiler','Servicios','Impuestos','Mantenimiento','Otros'];
+const STAFF=['Bren','Sofi','Nico'];
 const TABS=[['resumen','Resumen'],['ventas','Ventas'],['stock','Stock'],['compras','Compras'],['gastos','Gastos'],['recetas','Recetas'],['caja','Caja']];
 
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -198,8 +212,8 @@ function seed(){
     ['21:05',4,1,'Delivery','Transferencia'],['21:20',1,4,'Mesa','Efectivo'],['21:45',6,2,'Salón','Tarjeta'],
     ['22:10',5,1,'Personal','-']
   ];
-  const state={products:P,recipes:R,sales:[],purchases:[],expenses:[],cash:{open:20000,counted:''}};
-  S.forEach(([time,rid,qty,ch,pay])=>{const s=makeSale(state,rid,qty,ch,pay,t,time);state.sales.push(s)});
+  const state={products:P,recipes:R,sales:[],purchases:[],expenses:[],cash:{open:20000,counted:''},staff:STAFF.slice(),turno:STAFF[0]};
+  S.forEach(([time,rid,qty,ch,pay],i)=>{const s=makeSale(state,rid,qty,ch,pay,t,time,STAFF[i<4?0:1]);state.sales.push(s)});
   state.purchases=[
     {id:uid(),date:t,supplier:'Distribuidora Norte',pid:4,qty:3000,total:30000},
     {id:uid(),date:t,supplier:'Verdulería Don Pepe',pid:10,qty:30,total:7500}
@@ -212,22 +226,25 @@ function seed(){
   return state;
 }
 function recipeCost(st,r){return r.items.reduce((a,i)=>{const p=st.products.find(x=>x.id===i.pid);return a+(p?p.cost*i.qty:0)},0)}
-function makeSale(st,rid,qty,channel,pay,date,time){
+function makeSale(st,rid,qty,channel,pay,date,time,who){
   const r=st.recipes.find(x=>x.id===rid);
+  const nro=st.sales.filter(s=>s.date===date).length+1;
   const uses=r.items.map(i=>({pid:i.pid,qty:i.qty*qty}));
   {const v=st.products.find(p=>p.name.startsWith('Vaso'));if(v)uses.push({pid:v.id,qty:qty})}
   let cost=0;
   uses.forEach(u=>{const p=st.products.find(x=>x.id===u.pid);p.stock=Math.max(0,p.stock-u.qty);cost+=p.cost*u.qty});
-  return {id:uid(),date,time,rid,name:r.name,qty,channel,pay,total:channel==='Personal'?0:r.price*qty,cost,uses};
+  return {id:uid(),nro,date,time,rid,name:r.name,qty,channel,pay,who:who||st.turno||'',total:channel==='Personal'?0:r.price*qty,cost,uses};
 }
 
 let S=null;
 try{const raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw)}catch(e){}
 if(!S||!S.products)S=seed();
 if(!S.cash)S.cash={open:20000,counted:''};
+if(!S.staff||!S.staff.length)S.staff=STAFF.slice();
+if(!S.turno)S.turno=S.staff[0];
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
-let tab='resumen', period='hoy', chan='Salón', toastT;
+let tab='resumen', period='hoy', chan='Salón', toastT, autoPrint=false;
 const inPeriod=x=>period==='todo'||x.date===today();
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
 const val=id=>document.getElementById(id).value;
@@ -238,6 +255,68 @@ function segHTML(){return `<div class="seg" role="group" aria-label="Período"><
 function setPeriod(p){period=p;render()}
 function setTab(t){tab=t;render();window.scrollTo(0,0)}
 function setChan(c){chan=c;render()}
+function setTurno(n){S.turno=n;save();render();toast('Turno de '+n)}
+function addStaff(){
+  const n=val('s_n').trim();if(!n){toast('Escribí el nombre');return}
+  if(S.staff.indexOf(n)>=0){toast('Ya está en la lista');return}
+  S.staff.push(n);S.turno=n;save();render();toast(n+' agregada al turno');
+}
+function whoHTML(){
+  return `<div class="who"><span>En el turno:</span>${S.staff.map(n=>`<button class="chip" aria-pressed="${n===S.turno}" onclick="setTurno('${esc(n)}')">${esc(n)}</button>`).join('')}</div>`;
+}
+
+function printTicket(html){
+  document.getElementById('ticket').innerHTML=html;
+  window.print();
+}
+function comandaHTML(s){
+  const r=S.recipes.find(x=>x.id===s.rid);
+  return `<h4>Tragos Bakanno's</h4>
+  <div class="tc">San Antonio 1455 · Merlo</div>
+  <div class="sep"></div>
+  <div class="tl"><span>COMANDA N° ${s.nro||'-'}</span><span>${s.time}</span></div>
+  <div class="tl"><span>${esc(s.channel)}</span><span>${esc(s.date)}</span></div>
+  ${s.who?`<div class="tl"><span>Atendió</span><span>${esc(s.who)}</span></div>`:''}
+  <div class="sep"></div>
+  <div class="tl tb"><span>${s.qty} x ${esc(s.name)}</span><span>${s.channel==='Personal'?'—':fmt(s.total)}</span></div>
+  ${r?`<div style="font-size:11px">${r.items.map(i=>{const p=S.products.find(x=>x.id===i.pid);return p?esc(p.name)+' '+num(i.qty*s.qty)+' '+p.unit:''}).filter(Boolean).join(' / ')}</div>`:''}
+  <div class="sep"></div>
+  <div class="tl tb"><span>TOTAL</span><span>${s.channel==='Personal'?'CONSUMO PERSONAL':fmt(s.total)}</span></div>
+  <div class="tl"><span>Pago</span><span>${s.pay==='-'?'—':esc(s.pay)}</span></div>
+  <div class="sep"></div>
+  <div class="tc">¡Gracias! Beber con moderación</div>
+  <div class="tc" style="font-size:10px">Demo · no válido como comprobante fiscal</div>`;
+}
+function printComanda(id){
+  const s=S.sales.find(x=>x.id===id);if(!s)return;
+  printTicket(comandaHTML(s));
+}
+function printCierre(){
+  const t=today();
+  const sales=S.sales.filter(x=>x.date===t), exp=S.expenses.filter(x=>x.date===t);
+  const por=m=>sales.filter(s=>s.pay===m).reduce((a,s)=>a+s.total,0);
+  const efeG=exp.filter(e=>e.method==='Efectivo').reduce((a,e)=>a+e.amount,0);
+  const esperado=(S.cash.open||0)+por('Efectivo')-efeG;
+  const cont=S.cash.counted===''?null:Number(S.cash.counted);
+  const nombres=S.staff.filter(n=>sales.some(s=>s.who===n));
+  return printTicket(`<h4>Cierre de caja</h4>
+  <div class="tc">Tragos Bakanno's · ${t}</div>
+  <div class="sep"></div>
+  ${nombres.length?`<div class="tl"><span>Turno</span><span>${nombres.map(esc).join(', ')}</span></div>`:''}
+  <div class="tl"><span>Tragos vendidos</span><span>${sales.reduce((a,s)=>a+s.qty,0)}</span></div>
+  <div class="sep"></div>
+  ${PAYS.map(m=>`<div class="tl"><span>${m}</span><span>${fmt(por(m))}</span></div>`).join('')}
+  <div class="tl tb"><span>TOTAL VENDIDO</span><span>${fmt(PAYS.reduce((a,m)=>a+por(m),0))}</span></div>
+  <div class="sep"></div>
+  <div class="tl"><span>Apertura</span><span>${fmt(S.cash.open||0)}</span></div>
+  <div class="tl"><span>Gastos en efectivo</span><span>-${fmt(efeG)}</span></div>
+  <div class="tl tb"><span>EFECTIVO ESPERADO</span><span>${fmt(esperado)}</span></div>
+  <div class="tl"><span>Contado</span><span>${cont===null?'sin contar':fmt(cont)}</span></div>
+  <div class="tl tb"><span>DIFERENCIA</span><span>${cont===null?'—':(cont-esperado>0?'+':'')+fmt(cont-esperado)}</span></div>
+  <div class="sep"></div>
+  <div class="tl"><span>Firma</span><span>__________</span></div>
+  <div class="tc" style="font-size:10px;margin-top:8px">Demo · no válido como comprobante fiscal</div>`);
+}
 
 function vResumen(){
   const sales=S.sales.filter(inPeriod), exp=S.expenses.filter(inPeriod), pur=S.purchases.filter(inPeriod);
@@ -269,6 +348,7 @@ function vVentas(){
   const sales=S.sales.filter(inPeriod).slice().reverse();
   const opts=S.recipes.map(r=>`<option value="${r.id}">${esc(r.name)} · ${fmt(r.price)}</option>`).join('');
   return `<h2>Registrar venta</h2>
+  ${whoHTML()}
   <div class="card">
     <label for="v_r">Trago</label><select id="v_r">${opts}</select>
     <div class="g2"><div><label for="v_q">Cantidad</label><input id="v_q" type="number" inputmode="numeric" min="1" value="1"></div>
@@ -276,16 +356,19 @@ function vVentas(){
     <label>Canal</label>
     <div class="chips">${CHANNELS.map(c=>`<button class="chip" aria-pressed="${c===chan}" onclick="setChan('${c}')">${c}</button>`).join('')}</div>
     <div class="note">${chan==='Personal'?'Consumo del personal: descuenta stock pero no suma ingresos.':chan==='Eventos'?'Eventos: cargá el total del pedido; descuenta insumos y vasos igual que una venta normal.':'Al registrar, el stock baja según la receta y se descuenta un vaso descartable.'}</div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--ink)"><input type="checkbox" id="v_pr" ${autoPrint?'checked':''} onchange="autoPrint=this.checked" style="width:auto"> Imprimir la comanda al registrar</label>
     <button class="btn" onclick="addSale()">Registrar venta</button>
   </div>
   <h2>Ventas ${period==='hoy'?'de hoy':'registradas'}</h2>${segHTML()}
-  <div class="card">${sales.length?sales.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">${s.time} · ${s.channel}${s.pay!=='-'?' · '+s.pay:''}</div></div><div style="text-align:right"><div class="num">${s.channel==='Personal'?'Personal':fmt(s.total)}</div><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div>`).join(''):'<div class="empty">No hay ventas en este período.</div>'}</div>`;
+  <div class="card">${sales.length?sales.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">N° ${s.nro||'-'} · ${s.time} · ${s.channel}${s.pay!=='-'?' · '+s.pay:''}${s.who?' · '+esc(s.who):''}</div></div><div style="text-align:right"><div class="num">${s.channel==='Personal'?'Personal':fmt(s.total)}</div><div style="display:flex;gap:6px;margin-top:4px;justify-content:flex-end"><button class="mini" onclick="printComanda('${s.id}')">Comanda</button><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div></div>`).join(''):'<div class="empty">No hay ventas en este período.</div>'}</div>
+  <div class="note">"Comanda" abre el ticket listo para imprimir: sale por la impresora de tickets del local o por cualquier impresora común.</div>`;
 }
 function addSale(){
   const q=parseInt(val('v_q'));if(!(q>0)){toast('Poné una cantidad válida');return}
   const pay=chan==='Personal'?'-':val('v_p');
-  const s=makeSale(S,parseInt(val('v_r')),q,chan,pay,today(),hhmm());
-  S.sales.push(s);save();render();toast('Venta registrada · stock actualizado');
+  const s=makeSale(S,parseInt(val('v_r')),q,chan,pay,today(),hhmm(),S.turno);
+  S.sales.push(s);save();render();toast('Venta de '+(s.who||'turno')+' registrada · stock actualizado');
+  if(autoPrint)printComanda(s.id);
 }
 function delSale(id){
   const s=S.sales.find(x=>x.id===id);if(!s)return;
@@ -403,7 +486,12 @@ function vCaja(){
   const esperado=(S.cash.open||0)+efeV-efeG;
   const counted=S.cash.counted===''||S.cash.counted===null?null:Number(S.cash.counted);
   const dif=counted===null?null:counted-esperado;
+  const porPersona=S.staff.map(n=>{
+    const ss=sales.filter(s=>s.who===n);
+    return {n,q:ss.reduce((a,s)=>a+s.qty,0),v:ss.reduce((a,s)=>a+s.total,0),e:ss.filter(s=>s.pay==='Efectivo').reduce((a,s)=>a+s.total,0)};
+  }).filter(x=>x.q>0);
   return `<h2>Cierre de caja · hoy</h2>
+  ${whoHTML()}
   <div class="kpis">
     <div class="kpi big"><small>Efectivo que tiene que haber</small><b>${fmt(esperado)}</b></div>
     <div class="kpi"><small>Ventas en efectivo</small><b>${fmt(efeV)}</b></div>
@@ -412,8 +500,19 @@ function vCaja(){
   <div class="card">
     <div class="row"><span class="t">Apertura de caja</span><span class="num"><input id="k_o" type="number" inputmode="decimal" value="${S.cash.open||0}" aria-label="Apertura de caja" style="padding:7px 10px;font-size:14px;max-width:130px;text-align:right"></span></div>
     <div class="row"><span class="t">Efectivo contado</span><span class="num"><input id="k_c" type="number" inputmode="decimal" value="${S.cash.counted===''?'':S.cash.counted}" placeholder="Contá y anotá" aria-label="Efectivo contado" style="padding:7px 10px;font-size:14px;max-width:130px;text-align:right"></span></div>
+    <div class="row"><span class="t">Responsable del cierre</span><span class="num">${esc(S.turno||'—')}</span></div>
     <button class="btn" onclick="saveCash()">Guardar cierre</button>
+    <button class="btn ghost" onclick="printCierre()">Imprimir cierre de caja</button>
     ${dif===null?'<div class="note">Anotá el efectivo contado para ver la diferencia.</div>':`<div class="row" style="margin-top:6px"><span class="t">Diferencia</span><span class="num ${dif===0?'':dif>0?'pos':'neg'}">${dif>0?'+':''}${fmt(dif)}</span></div><div class="note">${dif===0?'Caja justa.':dif>0?'Sobra efectivo: puede ser una venta sin registrar.':'Falta efectivo: revisá vueltos, gastos sin cargar o ventas mal cobradas.'}</div>`}
+  </div>
+  ${porPersona.length?`<h2>Turno de hoy, por persona</h2>
+  <div class="card">${porPersona.map(x=>`<div class="row"><div><div class="t">${esc(x.n)}</div><div class="s">${x.q} tragos · ${fmt(x.e)} en efectivo</div></div><div class="num">${fmt(x.v)}</div></div>`).join('')}</div>
+  <div class="note">Cada venta queda con el nombre de quien la cargó. Si al cerrar falta plata, se ve en qué turno pasó.</div>`:''}
+  <h2>Personal</h2>
+  <div class="card">
+    <label for="s_n">Agregar a alguien al turno</label>
+    <div style="display:flex;gap:8px"><input id="s_n" placeholder="Nombre"><button class="mini" onclick="addStaff()">Agregar</button></div>
+    <div class="note" style="margin-bottom:0">En la versión real cada una entra con su usuario y no puede borrar ventas de otra.</div>
   </div>
   <h2>Cobrado por medio de pago</h2>
   <div class="card">
