@@ -98,6 +98,17 @@ input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:
 .gate .back{margin-top:20px}
 .gerr{color:#FF8A80;font-size:14px;font-weight:600;min-height:20px;margin-top:10px}
 .who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+.mesas{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.mesa{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;border-radius:14px;padding:11px 10px;cursor:pointer;text-align:left}
+.mesa .mn{font-weight:800;font-size:17px}
+.mesa .mw{font-size:12.5px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mesa .mt{font-weight:700;font-size:14px;margin-top:6px}
+.mesa.abierta{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.mesa.abierta .mt{color:var(--accent)}
+.mesa.sel{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mesa.sel .mw,.mesa.sel .mt{color:inherit;opacity:.9}
+.cobrar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.cobrar button{border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;font-size:14px;padding:12px 6px;border-radius:12px;cursor:pointer}
 .ticket{display:none}
 @media print{
   html,body{background:#fff!important}
@@ -172,7 +183,8 @@ const CHANNELS=['Salón','Mesa','Delivery','Eventos','Personal'];
 const PAYS=['Efectivo','Tarjeta','Transferencia'];
 const CATS=['Sueldos','Alquiler','Servicios','Impuestos','Mantenimiento','Otros'];
 const STAFF=['Bren','Sofi','Nico'];
-const TABS=[['resumen','Resumen'],['ventas','Ventas'],['stock','Stock'],['compras','Compras'],['gastos','Gastos'],['recetas','Recetas'],['caja','Caja']];
+const MESAS=8;
+const TABS=[['resumen','Resumen'],['mesas','Mesas'],['ventas','Ventas'],['stock','Stock'],['compras','Compras'],['gastos','Gastos'],['recetas','Recetas'],['caja','Caja']];
 
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fmt=n=>'$'+Math.round(n).toLocaleString('es-AR');
@@ -212,7 +224,7 @@ function seed(){
     ['21:05',4,1,'Delivery','Transferencia'],['21:20',1,4,'Mesa','Efectivo'],['21:45',6,2,'Salón','Tarjeta'],
     ['22:10',5,1,'Personal','-']
   ];
-  const state={products:P,recipes:R,sales:[],purchases:[],expenses:[],cash:{open:20000,counted:''},staff:STAFF.slice(),turno:STAFF[0]};
+  const state={products:P,recipes:R,sales:[],purchases:[],expenses:[],cash:{open:20000,counted:''},staff:STAFF.slice(),turno:STAFF[0],tables:Array.from({length:MESAS},(_,i)=>({n:i+1,who:STAFF[i%2]}))};
   S.forEach(([time,rid,qty,ch,pay],i)=>{const s=makeSale(state,rid,qty,ch,pay,t,time,STAFF[i<4?0:1]);state.sales.push(s)});
   state.purchases=[
     {id:uid(),date:t,supplier:'Distribuidora Norte',pid:4,qty:3000,total:30000},
@@ -242,9 +254,10 @@ if(!S||!S.products)S=seed();
 if(!S.cash)S.cash={open:20000,counted:''};
 if(!S.staff||!S.staff.length)S.staff=STAFF.slice();
 if(!S.turno)S.turno=S.staff[0];
+if(!S.tables||!S.tables.length)S.tables=Array.from({length:MESAS},(_,i)=>({n:i+1,who:S.staff[i%S.staff.length]}));
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
-let tab='resumen', period='hoy', chan='Salón', toastT, autoPrint=false;
+let tab='resumen', period='hoy', chan='Salón', toastT, autoPrint=false, mesaSel=null;
 const inPeriod=x=>period==='todo'||x.date===today();
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
 const val=id=>document.getElementById(id).value;
@@ -287,6 +300,82 @@ function comandaHTML(s){
   <div class="tc">¡Gracias! Beber con moderación</div>
   <div class="tc" style="font-size:10px">Demo · no válido como comprobante fiscal</div>`;
 }
+const pendientes=n=>S.sales.filter(s=>s.mesa===n&&s.pay==='Pendiente');
+const totalMesa=n=>pendientes(n).reduce((a,s)=>a+s.total,0);
+
+function vMesas(){
+  const abiertas=S.tables.filter(t=>pendientes(t.n).length);
+  const t=mesaSel?S.tables.find(x=>x.n===mesaSel):null;
+  const ped=t?pendientes(t.n):[];
+  return `<h2>Salón</h2>
+  <div class="kpis" style="margin-bottom:12px">
+    <div class="kpi"><small>Mesas abiertas</small><b>${abiertas.length} de ${S.tables.length}</b></div>
+    <div class="kpi"><small>Sin cobrar en mesas</small><b>${fmt(abiertas.reduce((a,x)=>a+totalMesa(x.n),0))}</b></div>
+  </div>
+  <div class="mesas">${S.tables.map(x=>{
+    const tt=totalMesa(x.n), ab=pendientes(x.n).length;
+    return `<button class="mesa ${ab?'abierta':''} ${x.n===mesaSel?'sel':''}" onclick="selMesa(${x.n})">
+      <div class="mn">Mesa ${x.n}</div><div class="mw">${esc(x.who||'sin asignar')}</div>
+      <div class="mt">${ab?fmt(tt):'Libre'}</div></button>`}).join('')}</div>
+  <div style="display:flex;gap:8px;margin-top:10px"><button class="mini" onclick="addMesa()">Agregar mesa</button>${S.tables.length>1?`<button class="mini" onclick="delMesa()">Quitar la última</button>`:''}</div>
+  ${t?`
+  <h2>Mesa ${t.n}</h2>
+  <div class="card">
+    <label>Quién atiende esta mesa</label>
+    <div class="chips">${S.staff.map(n=>`<button class="chip" aria-pressed="${n===t.who}" onclick="setMesaWho(${t.n},'${esc(n)}')">${esc(n)}</button>`).join('')}</div>
+    <label for="m_r" style="margin-top:14px">Agregar un trago a la mesa</label>
+    <select id="m_r">${S.recipes.map(r=>`<option value="${r.id}">${esc(r.name)} · ${fmt(r.price)}</option>`).join('')}</select>
+    <div class="g2" style="margin-top:8px"><input id="m_q" type="number" inputmode="numeric" min="1" value="1" aria-label="Cantidad"><button class="btn" style="margin:0" onclick="addMesaItem(${t.n})">Agregar</button></div>
+    <div class="note">El stock sale en el momento en que se pide, no cuando se cobra.</div>
+  </div>
+  <div class="card">
+    ${ped.length?ped.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">N° ${s.nro||'-'} · ${s.time} · ${esc(s.who||'')}</div></div><div style="text-align:right"><div class="num">${fmt(s.total)}</div><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div>`).join(''):'<div class="empty">La mesa está libre. Agregá el primer trago.</div>'}
+    ${ped.length?`<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px"><span class="t" style="font-size:17px">Total mesa ${t.n}</span><span class="num" style="font-size:19px">${fmt(totalMesa(t.n))}</span></div>
+    <button class="btn ghost" onclick="printMesa(${t.n})">Imprimir comanda de la mesa</button>
+    <label style="margin-top:14px">Cobrar y liberar</label>
+    <div class="cobrar">${PAYS.map(m=>`<button onclick="cobrarMesa(${t.n},'${m}')">${m}</button>`).join('')}</div>`:''}
+  </div>`:'<div class="note">Tocá una mesa para abrirla, asignarle una empleada y cargarle los tragos.</div>'}`;
+}
+function selMesa(n){mesaSel=mesaSel===n?null:n;render()}
+function setMesaWho(n,w){S.tables.find(t=>t.n===n).who=w;save();render();toast('Mesa '+n+' a cargo de '+w)}
+function addMesa(){S.tables.push({n:(S.tables[S.tables.length-1]?.n||0)+1,who:S.turno});save();render();toast('Mesa agregada')}
+function delMesa(){
+  const last=S.tables[S.tables.length-1];
+  if(pendientes(last.n).length){toast('Esa mesa tiene consumo sin cobrar');return}
+  if(mesaSel===last.n)mesaSel=null;
+  S.tables.pop();save();render();toast('Mesa quitada');
+}
+function addMesaItem(n){
+  const q=parseInt(val('m_q'));if(!(q>0)){toast('Poné una cantidad válida');return}
+  const t=S.tables.find(x=>x.n===n);
+  const s=makeSale(S,parseInt(val('m_r')),q,'Mesa','Pendiente',today(),hhmm(),t.who);
+  s.mesa=n;S.sales.push(s);save();render();toast('Agregado a la mesa '+n);
+  if(autoPrint)printComanda(s.id);
+}
+function cobrarMesa(n,metodo){
+  const ped=pendientes(n);
+  if(!ped.length){toast('La mesa no tiene consumo');return}
+  const tot=ped.reduce((a,s)=>a+s.total,0);
+  ped.forEach(s=>{s.pay=metodo});
+  mesaSel=null;save();render();toast('Mesa '+n+' cobrada: '+fmt(tot)+' en '+metodo);
+}
+function printMesa(n){
+  const t=S.tables.find(x=>x.n===n), ped=pendientes(n);
+  if(!ped.length){toast('La mesa no tiene consumo');return}
+  printTicket(`<h4>Tragos Bakanno's</h4>
+  <div class="tc">San Antonio 1455 · Merlo</div>
+  <div class="sep"></div>
+  <div class="tl tb"><span>MESA ${n}</span><span>${hhmm()}</span></div>
+  <div class="tl"><span>Atiende</span><span>${esc(t.who||'-')}</span></div>
+  <div class="sep"></div>
+  ${ped.map(s=>`<div class="tl"><span>${s.qty} x ${esc(s.name)}</span><span>${fmt(s.total)}</span></div>`).join('')}
+  <div class="sep"></div>
+  <div class="tl tb"><span>TOTAL</span><span>${fmt(totalMesa(n))}</span></div>
+  <div class="sep"></div>
+  <div class="tc">¡Gracias! Beber con moderación</div>
+  <div class="tc" style="font-size:10px">Demo · no válido como comprobante fiscal</div>`);
+}
+
 function printComanda(id){
   const s=S.sales.find(x=>x.id===id);if(!s)return;
   printTicket(comandaHTML(s));
@@ -334,6 +423,8 @@ function vResumen(){
     <div class="kpi"><small>Costo de lo vendido</small><b>${fmt(cmv)}</b></div>
     <div class="kpi"><small>Gastos</small><b>${fmt(gas)}</b></div>
     <div class="kpi"><small>Compras de mercadería</small><b>${fmt(comp)}</b></div>
+    <div class="kpi"><small>Mesas abiertas</small><b>${S.tables.filter(t=>pendientes(t.n).length).length} de ${S.tables.length}</b></div>
+    <div class="kpi"><small>Sin cobrar en mesas</small><b>${fmt(S.tables.reduce((a,t)=>a+totalMesa(t.n),0))}</b></div>
   </div>
   <h2>Ventas por canal</h2>
   <div class="card">${byCh.map(x=>`<div style="margin:6px 0"><div class="row" style="border:0;padding:0"><span class="t">${x.c}</span><span class="num">${x.c==='Personal'?'Consumo '+fmt(x.v):fmt(x.v)} <span class="s">· ${x.n} tragos</span></span></div><div class="bar"><i class="${x.c==='Personal'?'low':'acc'}" style="width:${x.v/maxCh*100}%"></i></div></div>`).join('')}</div>
@@ -360,7 +451,7 @@ function vVentas(){
     <button class="btn" onclick="addSale()">Registrar venta</button>
   </div>
   <h2>Ventas ${period==='hoy'?'de hoy':'registradas'}</h2>${segHTML()}
-  <div class="card">${sales.length?sales.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">N° ${s.nro||'-'} · ${s.time} · ${s.channel}${s.pay!=='-'?' · '+s.pay:''}${s.who?' · '+esc(s.who):''}</div></div><div style="text-align:right"><div class="num">${s.channel==='Personal'?'Personal':fmt(s.total)}</div><div style="display:flex;gap:6px;margin-top:4px;justify-content:flex-end"><button class="mini" onclick="printComanda('${s.id}')">Comanda</button><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div></div>`).join(''):'<div class="empty">No hay ventas en este período.</div>'}</div>
+  <div class="card">${sales.length?sales.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">N° ${s.nro||'-'} · ${s.time} · ${s.mesa?'Mesa '+s.mesa:s.channel}${s.pay!=='-'?' · '+s.pay:''}${s.who?' · '+esc(s.who):''}</div></div><div style="text-align:right"><div class="num">${s.channel==='Personal'?'Personal':fmt(s.total)}</div><div style="display:flex;gap:6px;margin-top:4px;justify-content:flex-end"><button class="mini" onclick="printComanda('${s.id}')">Comanda</button><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div></div>`).join(''):'<div class="empty">No hay ventas en este período.</div>'}</div>
   <div class="note">"Comanda" abre el ticket listo para imprimir: sale por la impresora de tickets del local o por cualquier impresora común.</div>`;
 }
 function addSale(){
@@ -536,7 +627,7 @@ function resetDemo(){
   S=seed();save();render();toast('Datos de ejemplo restablecidos');
 }
 
-const VIEWS={resumen:vResumen,ventas:vVentas,stock:vStock,compras:vCompras,gastos:vGastos,recetas:vRecetas,caja:vCaja};
+const VIEWS={resumen:vResumen,mesas:vMesas,ventas:vVentas,stock:vStock,compras:vCompras,gastos:vGastos,recetas:vRecetas,caja:vCaja};
 function render(){
   document.getElementById('tabs').innerHTML=TABS.map(function(x){return `<button class="tab" role="tab" aria-selected="${x[0]===tab}" onclick="setTab('${x[0]}')">${x[1]}</button>`}).join('');
   document.getElementById('view').innerHTML=(VIEWS[tab]||vResumen)();
