@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tragos Bakanno's · Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF4EE; --card:#FFFFFF; --ink:#1E1712; --mute:#786A5C; --line:#EADFD3;
+  --accent:#E4570F; --accent-ink:#FFFFFF; --lime:#6E9E00; --limebg:#EAF5C8; --warn:#B3261E; --warnbg:#FCE4E1;
+  --amber:#8A5A00; --amberbg:#FFEFC7;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14100C; --card:#211A14; --ink:#F7EFE6; --mute:#B0A292; --line:#3A2F25;
+    --accent:#FF7A1A; --accent-ink:#1A0C02; --lime:#B6E533; --limebg:#2A3510; --warn:#FF8A80; --warnbg:#3D1B1E;
+    --amber:#FFC857; --amberbg:#3A2C0C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14100C; --card:#211A14; --ink:#F7EFE6; --mute:#B0A292; --line:#3A2F25;
+  --accent:#FF7A1A; --accent-ink:#1A0C02; --lime:#B6E533; --limebg:#2A3510; --warn:#FF8A80; --warnbg:#3D1B1E;
+  --amber:#FFC857; --amberbg:#3A2C0C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+.demo{background:#12B5A6;color:#032B27;font-size:13px;font-weight:600;text-align:center;padding:6px 12px}
+.demo a{color:#032B27}
+header{padding:18px 16px 10px;max-width:760px;margin:0 auto}
+.brand{font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1}
+.brand span{color:var(--accent)}
+.sub{color:var(--mute);font-size:13px;margin-top:4px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:760px;margin:0 auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{max-width:760px;margin:0 auto;padding:14px 16px 90px}
+h2{font-size:20px;margin:22px 0 10px;letter-spacing:-.01em}
+h2:first-child{margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi small{color:var(--mute);font-size:13px;display:block}
+.kpi b{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.kpi.big{grid-column:1/-1;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.kpi.big small{color:inherit;opacity:.85}
+.kpi.big b{font-size:34px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .t{font-weight:600}
+.row .s{color:var(--mute);font-size:13px}
+.num{font-weight:700;white-space:nowrap;text-align:right}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.b-low{background:var(--warnbg);color:var(--warn)}
+.b-ok{background:var(--limebg);color:var(--lime)}
+.b-mid{background:var(--amberbg);color:var(--amber)}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--lime);border-radius:99px}
+.bar i.low{background:var(--warn)}
+.bar i.acc{background:var(--accent)}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+input,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;margin-top:14px;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;font-size:16px;padding:13px;border-radius:12px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--mute);border:1px solid var(--line);font-weight:600;font-size:14px;padding:10px}
+.mini{border:1px solid var(--line);background:transparent;color:var(--mute);font:inherit;font-size:13px;padding:5px 10px;border-radius:8px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.empty{color:var(--mute);text-align:center;padding:18px 0;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;background:var(--card);color:var(--mute);font:inherit;font-size:14px;font-weight:600;padding:7px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:20}
+#toast.on{opacity:1}
+.note{font-size:13px;color:var(--mute);margin:8px 2px}
+.pos{color:var(--lime)} .neg{color:var(--warn)}
+.ing{font-size:13px;color:var(--mute);margin-top:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="demo">Demo · datos de ejemplo, se guardan solo en este dispositivo · <a href="../">volver</a></div>
+<header>
+  <div class="brand">Tragos <span>Bakanno's</span></div>
+  <div class="sub">Cocteleria de barrio · San Antonio 1455, Merlo · <b>Demo</b></div>
+</header>
+<nav><div class="tabs" id="tabs" role="tablist"></div></nav>
+<main id="view"></main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY='bakannos_control_v1';
+const CHANNELS=['Salón','Mesa','Delivery','Eventos','Personal'];
+const PAYS=['Efectivo','Tarjeta','Transferencia'];
+const CATS=['Sueldos','Alquiler','Servicios','Impuestos','Mantenimiento','Otros'];
+const TABS=[['resumen','Resumen'],['ventas','Ventas'],['stock','Stock'],['compras','Compras'],['gastos','Gastos'],['recetas','Recetas'],['caja','Caja']];
+
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-AR');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const hhmm=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+
+function seed(){
+  const t=today();
+  const P=[
+    [1,'Fernet',  'ml',6000,1500,12],
+    [2,'Gin',     'ml',5000,1400,14],
+    [3,'Vodka',   'ml',4200,1400,11],
+    [4,'Ron blanco','ml',1800,1500,10],
+    [5,'Campari', 'ml',3000,1000,15],
+    [6,'Aperol',  'ml',2800,1000,9],
+    [7,'Espumante','ml',4500,1500,6],
+    [8,'Agua tónica','ml',12000,4000,1.5],
+    [9,'Gaseosa cola','ml',15000,4000,1.2],
+    [10,'Limón','un',40,20,250],
+    [11,'Hielo','kg',25,15,900],
+    [12,'Menta (atado)','un',6,5,800],
+    [13,'Vaso descartable con tapa','un',300,150,90],
+    [14,'Pulpa saborizada (sachet)','un',40,20,1800]
+  ].map(([id,name,unit,stock,min,cost])=>({id,name,unit,stock,min,cost}));
+  const R=[
+    {id:1,name:'Fernet con cola',price:5500,items:[[1,100],[9,250],[11,.3]]},
+    {id:2,name:'Gin tonic',price:7000,items:[[2,60],[8,200],[10,.5],[11,.2]]},
+    {id:3,name:'Aperol spritz',price:7500,items:[[6,60],[7,90],[8,50],[11,.2]]},
+    {id:4,name:'Mojito',price:7800,items:[[4,50],[10,1],[12,1],[8,100],[11,.2]]},
+    {id:5,name:'Campari con naranja',price:6500,items:[[5,60],[9,100],[11,.25]]},
+    {id:6,name:'Vodka tonic',price:6800,items:[[3,60],[8,200],[11,.2]]},
+    {id:7,name:'Frutal de la casa',price:6500,items:[[3,60],[14,1],[11,.25]]}
+  ].map(r=>({...r,items:r.items.map(([pid,qty])=>({pid,qty}))}));
+  const S=[
+    ['20:10',1,3,'Salón','Tarjeta'],['20:25',2,2,'Mesa','Efectivo'],['20:40',3,2,'Salón','Transferencia'],
+    ['21:05',4,1,'Delivery','Transferencia'],['21:20',1,4,'Mesa','Efectivo'],['21:45',6,2,'Salón','Tarjeta'],
+    ['22:10',5,1,'Personal','-']
+  ];
+  const state={products:P,recipes:R,sales:[],purchases:[],expenses:[],cash:{open:20000,counted:''}};
+  S.forEach(([time,rid,qty,ch,pay])=>{const s=makeSale(state,rid,qty,ch,pay,t,time);state.sales.push(s)});
+  state.purchases=[
+    {id:uid(),date:t,supplier:'Distribuidora Norte',pid:4,qty:3000,total:30000},
+    {id:uid(),date:t,supplier:'Verdulería Don Pepe',pid:10,qty:30,total:7500}
+  ];
+  state.purchases.forEach(p=>{const pr=state.products.find(x=>x.id===p.pid);pr.stock+=p.qty;pr.cost=p.total/p.qty});
+  state.expenses=[
+    {id:uid(),date:t,cat:'Servicios',desc:'Luz',amount:38000,method:'Transferencia'},
+    {id:uid(),date:t,cat:'Sueldos',desc:'Adelanto barra',amount:25000,method:'Efectivo'}
+  ];
+  return state;
+}
+function recipeCost(st,r){return r.items.reduce((a,i)=>{const p=st.products.find(x=>x.id===i.pid);return a+(p?p.cost*i.qty:0)},0)}
+function makeSale(st,rid,qty,channel,pay,date,time){
+  const r=st.recipes.find(x=>x.id===rid);
+  const uses=r.items.map(i=>({pid:i.pid,qty:i.qty*qty}));
+  {const v=st.products.find(p=>p.name.startsWith('Vaso'));if(v)uses.push({pid:v.id,qty:qty})}
+  let cost=0;
+  uses.forEach(u=>{const p=st.products.find(x=>x.id===u.pid);p.stock=Math.max(0,p.stock-u.qty);cost+=p.cost*u.qty});
+  return {id:uid(),date,time,rid,name:r.name,qty,channel,pay,total:channel==='Personal'?0:r.price*qty,cost,uses};
+}
+
+let S=null;
+try{const raw=localStorage.getItem(KEY);if(raw)S=JSON.parse(raw)}catch(e){}
+if(!S||!S.products)S=seed();
+if(!S.cash)S.cash={open:20000,counted:''};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+let tab='resumen', period='hoy', chan='Salón', toastT;
+const inPeriod=x=>period==='todo'||x.date===today();
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+const val=id=>document.getElementById(id).value;
+const prodOpts=()=>S.products.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.unit})</option>`).join('');
+const num=n=>Number(n).toLocaleString('es-AR',{maximumFractionDigits:1});
+
+function segHTML(){return `<div class="seg" role="group" aria-label="Período"><button aria-pressed="${period==='hoy'}" onclick="setPeriod('hoy')">Hoy</button><button aria-pressed="${period==='todo'}" onclick="setPeriod('todo')">Todo</button></div>`}
+function setPeriod(p){period=p;render()}
+function setTab(t){tab=t;render();window.scrollTo(0,0)}
+function setChan(c){chan=c;render()}
+
+function vResumen(){
+  const sales=S.sales.filter(inPeriod), exp=S.expenses.filter(inPeriod), pur=S.purchases.filter(inPeriod);
+  const rev=sales.reduce((a,s)=>a+s.total,0), cmv=sales.reduce((a,s)=>a+s.cost,0), gas=exp.reduce((a,e)=>a+e.amount,0), comp=pur.reduce((a,p)=>a+p.total,0);
+  const res=rev-cmv-gas;
+  const byCh=CHANNELS.map(c=>({c,v:sales.filter(s=>s.channel===c).reduce((a,s)=>a+(c==='Personal'?s.cost:s.total),0),n:sales.filter(s=>s.channel===c).reduce((a,s)=>a+s.qty,0)}));
+  const maxCh=Math.max(1,...byCh.map(x=>x.v));
+  const low=S.products.filter(p=>p.stock<=p.min);
+  const top={};sales.forEach(s=>{top[s.name]=(top[s.name]||0)+s.qty});
+  const topL=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  return segHTML()+`
+  <div class="kpis">
+    <div class="kpi big"><small>Resultado estimado</small><b>${fmt(res)}</b></div>
+    <div class="kpi"><small>Ventas</small><b>${fmt(rev)}</b></div>
+    <div class="kpi"><small>Costo de lo vendido</small><b>${fmt(cmv)}</b></div>
+    <div class="kpi"><small>Gastos</small><b>${fmt(gas)}</b></div>
+    <div class="kpi"><small>Compras de mercadería</small><b>${fmt(comp)}</b></div>
+  </div>
+  <h2>Ventas por canal</h2>
+  <div class="card">${byCh.map(x=>`<div style="margin:6px 0"><div class="row" style="border:0;padding:0"><span class="t">${x.c}</span><span class="num">${x.c==='Personal'?'Consumo '+fmt(x.v):fmt(x.v)} <span class="s">· ${x.n} tragos</span></span></div><div class="bar"><i class="${x.c==='Personal'?'low':'acc'}" style="width:${x.v/maxCh*100}%"></i></div></div>`).join('')}</div>
+  <h2>Stock a reponer</h2>
+  <div class="card">${low.length?low.map(p=>`<div class="row"><div><div class="t">${esc(p.name)}</div><div class="s">Mínimo ${num(p.min)} ${p.unit}</div></div><div class="num neg">${num(p.stock)} ${p.unit}</div></div>`).join(''):'<div class="empty">Todo el stock está por encima del mínimo.</div>'}</div>
+  <h2>Más vendidos</h2>
+  <div class="card">${topL.length?topL.map(([n,q])=>`<div class="row"><span class="t">${esc(n)}</span><span class="num">${q}</span></div>`).join(''):'<div class="empty">Todavía no hay ventas.</div>'}</div>
+  <button class="btn ghost" onclick="resetDemo()">Restablecer datos de ejemplo</button>`;
+}
+
+function vVentas(){
+  const sales=S.sales.filter(inPeriod).slice().reverse();
+  const opts=S.recipes.map(r=>`<option value="${r.id}">${esc(r.name)} · ${fmt(r.price)}</option>`).join('');
+  return `<h2>Registrar venta</h2>
+  <div class="card">
+    <label for="v_r">Trago</label><select id="v_r">${opts}</select>
+    <div class="g2"><div><label for="v_q">Cantidad</label><input id="v_q" type="number" inputmode="numeric" min="1" value="1"></div>
+    <div><label for="v_p">Medio de pago</label><select id="v_p" ${chan==='Personal'?'disabled':''}>${PAYS.map(p=>`<option>${p}</option>`).join('')}</select></div></div>
+    <label>Canal</label>
+    <div class="chips">${CHANNELS.map(c=>`<button class="chip" aria-pressed="${c===chan}" onclick="setChan('${c}')">${c}</button>`).join('')}</div>
+    <div class="note">${chan==='Personal'?'Consumo del personal: descuenta stock pero no suma ingresos.':chan==='Eventos'?'Eventos: cargá el total del pedido; descuenta insumos y vasos igual que una venta normal.':'Al registrar, el stock baja según la receta y se descuenta un vaso descartable.'}</div>
+    <button class="btn" onclick="addSale()">Registrar venta</button>
+  </div>
+  <h2>Ventas ${period==='hoy'?'de hoy':'registradas'}</h2>${segHTML()}
+  <div class="card">${sales.length?sales.map(s=>`<div class="row"><div><div class="t">${s.qty} × ${esc(s.name)}</div><div class="s">${s.time} · ${s.channel}${s.pay!=='-'?' · '+s.pay:''}</div></div><div style="text-align:right"><div class="num">${s.channel==='Personal'?'Personal':fmt(s.total)}</div><button class="mini" onclick="delSale('${s.id}')">Anular</button></div></div>`).join(''):'<div class="empty">No hay ventas en este período.</div>'}</div>`;
+}
+function addSale(){
+  const q=parseInt(val('v_q'));if(!(q>0)){toast('Poné una cantidad válida');return}
+  const pay=chan==='Personal'?'-':val('v_p');
+  const s=makeSale(S,parseInt(val('v_r')),q,chan,pay,today(),hhmm());
+  S.sales.push(s);save();render();toast('Venta registrada · stock actualizado');
+}
+function delSale(id){
+  const s=S.sales.find(x=>x.id===id);if(!s)return;
+  s.uses.forEach(u=>{const p=S.products.find(x=>x.id===u.pid);if(p)p.stock+=u.qty});
+  S.sales=S.sales.filter(x=>x.id!==id);save();render();toast('Venta anulada · stock devuelto');
+}
+
+function vStock(){
+  return `<h2>Stock actual</h2>
+  <div class="card">${S.products.map(p=>{
+    const pct=Math.min(100,p.stock/(p.min*3)*100), low=p.stock<=p.min, mid=!low&&p.stock<=p.min*1.5;
+    return `<div class="row" style="align-items:flex-start"><div style="flex:1"><div class="t">${esc(p.name)} <span class="badge ${low?'b-low':mid?'b-mid':'b-ok'}">${low?'Reponer':mid?'Justo':'OK'}</span></div>
+    <div class="s">Mínimo ${num(p.min)} ${p.unit} · Costo ${fmt(p.cost)}/${p.unit}</div><div class="bar"><i class="${low?'low':''}" style="width:${pct}%"></i></div>
+    <div style="display:flex;gap:8px;margin-top:8px"><input id="adj_${p.id}" type="number" inputmode="decimal" placeholder="Conteo real" aria-label="Conteo real de ${esc(p.name)}" style="padding:7px 10px;font-size:14px"><button class="mini" onclick="adjust(${p.id})">Ajustar</button></div></div>
+    <div class="num">${num(p.stock)} <span class="s">${p.unit}</span></div></div>`}).join('')}</div>
+  <div class="note">Ajustar sirve para corregir el stock después de contar en el local (merma, roturas, diferencias).</div>
+  <h2>Agregar producto</h2>
+  <div class="card">
+    <label for="n_n">Nombre</label><input id="n_n" placeholder="Ej: Cerveza rubia">
+    <div class="g2"><div><label for="n_u">Unidad</label><select id="n_u"><option>ml</option><option>un</option><option>kg</option></select></div>
+    <div><label for="n_m">Stock mínimo</label><input id="n_m" type="number" inputmode="decimal" placeholder="0"></div></div>
+    <div class="g2"><div><label for="n_s">Stock inicial</label><input id="n_s" type="number" inputmode="decimal" placeholder="0"></div>
+    <div><label for="n_c">Costo por unidad ($)</label><input id="n_c" type="number" inputmode="decimal" placeholder="0"></div></div>
+    <button class="btn" onclick="addProduct()">Agregar producto</button>
+  </div>`;
+}
+function adjust(id){
+  const v=parseFloat(document.getElementById('adj_'+id).value);if(isNaN(v)||v<0){toast('Ingresá el conteo real');return}
+  S.products.find(p=>p.id===id).stock=v;save();render();toast('Stock ajustado');
+}
+function addProduct(){
+  const name=val('n_n').trim();if(!name){toast('Falta el nombre');return}
+  S.products.push({id:Date.now(),name,unit:val('n_u'),stock:parseFloat(val('n_s'))||0,min:parseFloat(val('n_m'))||0,cost:parseFloat(val('n_c'))||0});
+  save();render();toast('Producto agregado');
+}
+
+function vCompras(){
+  const list=S.purchases.filter(inPeriod).slice().reverse();
+  return `<h2>Registrar compra</h2>
+  <div class="card">
+    <label for="c_p">Producto</label><select id="c_p">${prodOpts()}</select>
+    <div class="g2"><div><label for="c_q">Cantidad comprada</label><input id="c_q" type="number" inputmode="decimal" placeholder="Ej: 3000"></div>
+    <div><label for="c_t">Total pagado ($)</label><input id="c_t" type="number" inputmode="decimal" placeholder="Ej: 30000"></div></div>
+    <label for="c_s">Proveedor</label><input id="c_s" placeholder="Ej: Distribuidora Norte">
+    <div class="note">La cantidad se suma al stock y se actualiza el costo por unidad.</div>
+    <button class="btn" onclick="addPurchase()">Registrar compra</button>
+  </div>
+  <h2>Compras</h2>${segHTML()}
+  <div class="card">${list.length?list.map(p=>{const pr=S.products.find(x=>x.id===p.pid);return `<div class="row"><div><div class="t">${esc(pr?pr.name:'?')} · ${num(p.qty)} ${pr?pr.unit:''}</div><div class="s">${esc(p.supplier||'Sin proveedor')} · ${p.date}</div></div><div class="num">${fmt(p.total)}</div></div>`}).join(''):'<div class="empty">No hay compras en este período.</div>'}</div>`;
+}
+function addPurchase(){
+  const q=parseFloat(val('c_q')),t=parseFloat(val('c_t'));if(!(q>0)||!(t>=0)||isNaN(t)){toast('Completá cantidad y total');return}
+  const pid=parseInt(val('c_p')),pr=S.products.find(p=>p.id===pid);
+  S.purchases.push({id:uid(),date:today(),supplier:val('c_s').trim(),pid,qty:q,total:t});
+  pr.stock+=q;pr.cost=t/q;save();render();toast('Compra registrada · stock sumado');
+}
+
+function vGastos(){
+  const list=S.expenses.filter(inPeriod).slice().reverse();
+  const tot=list.reduce((a,e)=>a+e.amount,0);
+  const byCat=CATS.map(c=>({c,v:list.filter(e=>e.cat===c).reduce((a,e)=>a+e.amount,0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const maxCat=Math.max(1,...byCat.map(x=>x.v));
+  return `<h2>Registrar gasto</h2>
+  <div class="card">
+    <div class="g2"><div><label for="g_c">Categoría</label><select id="g_c">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div><label for="g_m">Se pagó con</label><select id="g_m">${PAYS.map(p=>`<option>${p}</option>`).join('')}</select></div></div>
+    <label for="g_d">Detalle</label><input id="g_d" placeholder="Ej: Luz, alquiler, arreglo de heladera">
+    <label for="g_a">Monto ($)</label><input id="g_a" type="number" inputmode="decimal" placeholder="Ej: 38000">
+    <div class="note">Los gastos restan en el resultado del período. Si pagás en efectivo, también salen de la caja.</div>
+    <button class="btn" onclick="addExpense()">Registrar gasto</button>
+  </div>
+  <h2>Gastos</h2>${segHTML()}
+  <div class="card">
+    <div class="row"><span class="t">Total del período</span><span class="num neg">${fmt(tot)}</span></div>
+    ${list.length?list.map(e=>`<div class="row"><div><div class="t">${esc(e.desc||e.cat)}</div><div class="s">${e.cat} · ${e.method} · ${e.date}</div></div><div style="text-align:right"><div class="num">${fmt(e.amount)}</div><button class="mini" onclick="delExpense('${e.id}')">Borrar</button></div></div>`).join(''):'<div class="empty">No hay gastos en este período.</div>'}
+  </div>
+  ${byCat.length?`<h2>Por categoría</h2><div class="card">${byCat.map(x=>`<div style="margin:6px 0"><div class="row" style="border:0;padding:0"><span class="t">${x.c}</span><span class="num">${fmt(x.v)}</span></div><div class="bar"><i class="acc" style="width:${x.v/maxCat*100}%"></i></div></div>`).join('')}</div>`:''}`;
+}
+function addExpense(){
+  const a=parseFloat(val('g_a'));if(!(a>0)){toast('Poné un monto válido');return}
+  S.expenses.push({id:uid(),date:today(),cat:val('g_c'),desc:val('g_d').trim(),amount:a,method:val('g_m')});
+  save();render();toast('Gasto registrado');
+}
+function delExpense(id){
+  S.expenses=S.expenses.filter(x=>x.id!==id);save();render();toast('Gasto borrado');
+}
+
+function vRecetas(){
+  return `<h2>Recetas y margen</h2>
+  <div class="note" style="margin-top:0">El costo se calcula con el precio real de cada insumo, más el vaso descartable que se descuenta en cada venta.</div>
+  <div class="card">${S.recipes.map(r=>{
+    const vaso=S.products.find(p=>p.name.startsWith('Vaso'));
+    const cost=recipeCost(S,r)+(vaso?vaso.cost:0);
+    const marg=r.price-cost, pct=r.price?marg/r.price*100:0;
+    const ing=r.items.map(i=>{const p=S.products.find(x=>x.id===i.pid);return p?`${esc(p.name)} ${num(i.qty)} ${p.unit}`:''}).filter(Boolean).join(' · ');
+    return `<div class="row" style="align-items:flex-start"><div style="flex:1">
+      <div class="t">${esc(r.name)} <span class="badge ${pct>=60?'b-ok':pct>=40?'b-mid':'b-low'}">${Math.round(pct)}% margen</span></div>
+      <div class="s">Costo ${fmt(cost)} · Ganancia ${fmt(marg)}</div>
+      <div class="ing">${ing}${vaso?' · '+esc(vaso.name)+' 1 un':''}</div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input id="pr_${r.id}" type="number" inputmode="decimal" value="${r.price}" aria-label="Precio de ${esc(r.name)}" style="padding:7px 10px;font-size:14px"><button class="mini" onclick="setPrice(${r.id})">Guardar precio</button></div>
+    </div><div class="num">${fmt(r.price)}</div></div>`}).join('')}</div>
+  <div class="note">Cambiá un precio y mirá cómo se mueve el margen. Las ventas ya registradas no se modifican.</div>`;
+}
+function setPrice(id){
+  const v=parseFloat(document.getElementById('pr_'+id).value);if(!(v>=0)){toast('Precio inválido');return}
+  S.recipes.find(r=>r.id===id).price=v;save();render();toast('Precio actualizado');
+}
+
+function vCaja(){
+  const sales=S.sales.filter(x=>x.date===today()), exp=S.expenses.filter(x=>x.date===today());
+  const efeV=sales.filter(s=>s.pay==='Efectivo').reduce((a,s)=>a+s.total,0);
+  const tarV=sales.filter(s=>s.pay==='Tarjeta').reduce((a,s)=>a+s.total,0);
+  const trfV=sales.filter(s=>s.pay==='Transferencia').reduce((a,s)=>a+s.total,0);
+  const efeG=exp.filter(e=>e.method==='Efectivo').reduce((a,e)=>a+e.amount,0);
+  const esperado=(S.cash.open||0)+efeV-efeG;
+  const counted=S.cash.counted===''||S.cash.counted===null?null:Number(S.cash.counted);
+  const dif=counted===null?null:counted-esperado;
+  return `<h2>Cierre de caja · hoy</h2>
+  <div class="kpis">
+    <div class="kpi big"><small>Efectivo que tiene que haber</small><b>${fmt(esperado)}</b></div>
+    <div class="kpi"><small>Ventas en efectivo</small><b>${fmt(efeV)}</b></div>
+    <div class="kpi"><small>Gastos en efectivo</small><b>${fmt(efeG)}</b></div>
+  </div>
+  <div class="card">
+    <div class="row"><span class="t">Apertura de caja</span><span class="num"><input id="k_o" type="number" inputmode="decimal" value="${S.cash.open||0}" aria-label="Apertura de caja" style="padding:7px 10px;font-size:14px;max-width:130px;text-align:right"></span></div>
+    <div class="row"><span class="t">Efectivo contado</span><span class="num"><input id="k_c" type="number" inputmode="decimal" value="${S.cash.counted===''?'':S.cash.counted}" placeholder="Contá y anotá" aria-label="Efectivo contado" style="padding:7px 10px;font-size:14px;max-width:130px;text-align:right"></span></div>
+    <button class="btn" onclick="saveCash()">Guardar cierre</button>
+    ${dif===null?'<div class="note">Anotá el efectivo contado para ver la diferencia.</div>':`<div class="row" style="margin-top:6px"><span class="t">Diferencia</span><span class="num ${dif===0?'':dif>0?'pos':'neg'}">${dif>0?'+':''}${fmt(dif)}</span></div><div class="note">${dif===0?'Caja justa.':dif>0?'Sobra efectivo: puede ser una venta sin registrar.':'Falta efectivo: revisá vueltos, gastos sin cargar o ventas mal cobradas.'}</div>`}
+  </div>
+  <h2>Cobrado por medio de pago</h2>
+  <div class="card">
+    <div class="row"><span class="t">Efectivo</span><span class="num">${fmt(efeV)}</span></div>
+    <div class="row"><span class="t">Tarjeta</span><span class="num">${fmt(tarV)}</span></div>
+    <div class="row"><span class="t">Transferencia</span><span class="num">${fmt(trfV)}</span></div>
+    <div class="row"><span class="t">Total del día</span><span class="num">${fmt(efeV+tarV+trfV)}</span></div>
+  </div>
+  <div class="note">Las compras a proveedores no se restan acá porque se cargan sin medio de pago.</div>`;
+}
+function saveCash(){
+  S.cash.open=parseFloat(val('k_o'))||0;
+  const c=val('k_c').trim();
+  S.cash.counted=c===''?'':parseFloat(c)||0;
+  save();render();toast('Cierre guardado');
+}
+
+function resetDemo(){
+  if(!confirm('¿Restablecer los datos de ejemplo? Se pierde lo que cargaste en esta demo.'))return;
+  try{localStorage.removeItem(KEY)}catch(e){}
+  S=seed();save();render();toast('Datos de ejemplo restablecidos');
+}
+
+const VIEWS={resumen:vResumen,ventas:vVentas,stock:vStock,compras:vCompras,gastos:vGastos,recetas:vRecetas,caja:vCaja};
+function render(){
+  document.getElementById('tabs').innerHTML=TABS.map(function(x){return `<button class="tab" role="tab" aria-selected="${x[0]===tab}" onclick="setTab('${x[0]}')">${x[1]}</button>`}).join('');
+  document.getElementById('view').innerHTML=(VIEWS[tab]||vResumen)();
+}
+render();
+</script>
+</body>
+</html>
