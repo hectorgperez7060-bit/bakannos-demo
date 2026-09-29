@@ -29,6 +29,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'Rubik',system-u
 .tag{font-family:'Anton',Impact,sans-serif;font-size:22px;text-transform:uppercase;margin:10px 0 0;color:#fff;letter-spacing:.02em}
 .meta{margin:14px 0 0;font-size:14px;color:#D7C9BA}
 .meta b{color:#fff}
+.proof{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.proof span{font-size:12.5px;font-weight:700;color:#FFD9B8;border:1px solid rgba(255,122,26,.5);border-radius:999px;padding:4px 11px}
 .hero a.cta{display:inline-block;margin-top:16px;background:#FF7A1A;color:#1A0C02;font-weight:700;padding:12px 20px;border-radius:999px;text-decoration:none}
 .wrap{max-width:820px;margin:0 auto;padding:0 16px}
 .cats{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
@@ -83,7 +85,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <header class="hero">
   <h1 class="logo">Bakanno's</h1>
   <p class="tag">Cocteleria de barrio</p>
-  <p class="meta"><b>Delivery y eventos</b> · San Antonio 1455, Merlo<br>Abrimos a las 20 hs</p>
+  <p class="meta"><b>Delivery y eventos</b> · San Antonio 1455, Merlo<br>Abrimos a las 20 hs · Desde 2022</p>
+  <p class="proof"><span>4,9 ★ en Google</span><span>8.600 seguidores</span><span>Retiro y delivery</span></p>
   <a class="cta" href="#carta">Ver la carta</a>
 </header>
 
@@ -106,7 +109,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </main>
 
-<div class="ft">Tragos Bakanno's · Cocteleria de barrio · San Antonio 1455, Merlo<br>Beber con moderación. Prohibida la venta a menores de 18 años.</div>
+<div class="ft">Tragos Bakanno's · Cocteleria de barrio · San Antonio 1455, Merlo<br><a href="https://www.instagram.com/_tragosbakanno.s/" target="_blank" rel="noopener" style="color:var(--orange)">@_tragosbakanno.s</a><br><br>Beber con moderación. Prohibida la venta a menores de 18 años.</div>
 
 <div class="bar" id="bar"><button onclick="openCart()"><span id="bar_n">0 productos</span><span id="bar_t">$0</span></button></div>
 
@@ -129,11 +132,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 <script>
 const SHIP=1500;
-const CATS=['Todos','Clásicos','Frutales','Cremosos','Combos'];
+const CATS=['Todos','Clásicos','Frutales','Cremosos','Combos','Regalos'];
 const CUPS={
   fer:['#5B2E14','#2A130A'], gin:['#DDF3EF','#9AD8CE'], vod:['#F2E6FF','#B58AE8'], moj:['#CFF2A8','#6DBB3B'],
   ape:['#FFB36B','#F26A1B'], fru:['#FF6F91','#8E1B4A'], blu:['#5CE1F0','#1877D8'], sun:['#FFD166','#FF7A1A'],
-  cho:['#F4D9C6','#5A2F1E'], can:['#FFE7A3','#E05D5D'], bal:['#FFB36B','#F26A1B'], fie:['#FF6F91','#FF7A1A']
+  cho:['#F4D9C6','#5A2F1E'], can:['#FFE7A3','#E05D5D'], bal:['#FFB36B','#F26A1B'], fie:['#FF6F91','#FF7A1A'],
+  ram:['#FF6F91','#E4570F']
 };
 const P=[
   {id:1,c:'Clásicos',n:'Fernet con cola',d:'El de siempre, bien cargado y con hielo.',p:5500,k:'fer'},
@@ -147,7 +151,9 @@ const P=[
   {id:9,c:'Cremosos',n:'Chocolate y frutilla',d:'Cremoso, con salsa de chocolate y frutilla fresca.',p:8500,k:'cho'},
   {id:10,c:'Cremosos',n:'Candy',d:'Cremoso con golosinas de colores.',p:8500,k:'can'},
   {id:11,c:'Combos',n:'Balde x4 tragos',d:'Cuatro tragos a elección para compartir.',p:22000,k:'bal',t:'Ahorrás'},
-  {id:12,c:'Combos',n:'Combo Fiesta x10',d:'Diez tragos para la juntada. Avisanos los gustos.',p:52000,k:'fie',t:'Ahorrás'}
+  {id:12,c:'Combos',n:'Combo Fiesta x10',d:'Diez tragos para la juntada. Avisanos los gustos.',p:52000,k:'fie',t:'Ahorrás'},
+  {id:13,c:'Regalos',n:'Ramo de tragos',d:'Cuatro tragos armados como ramo, con moño y tarjeta. Para cumpleaños y sorpresas.',p:28000,k:'ram',t:'Para regalar'},
+  {id:14,c:'Regalos',n:'Ramo grande x6',d:'Seis tragos, flores y presentación completa. Se encarga con un día de anticipación.',p:39000,k:'ram',t:'Para regalar'}
 ];
 let cat='Todos', cart={}, mode='Delivery';
 const fmt=n=>'$'+Math.round(n).toLocaleString('es-AR');
@@ -164,6 +170,17 @@ function cupSVG(k){
   <circle cx="42" cy="72" r="3" fill="#fff" fill-opacity=".35"/><circle cx="36" cy="82" r="2" fill="#fff" fill-opacity=".35"/><circle cx="48" cy="86" r="2.4" fill="#fff" fill-opacity=".35"/>
   </svg>`;
 }
+function ramoSVG(){
+  return `<svg viewBox="0 0 84 110" width="84" height="110" aria-hidden="true">
+  <defs><linearGradient id="gram" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6F91"/><stop offset="1" stop-color="#E4570F"/></linearGradient></defs>
+  <path d="M26 58 L58 58 L50 100 Q49 104 44 104 L40 104 Q35 104 34 100 Z" fill="#4A3A2C" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+  <g stroke="#2A1F16" stroke-width="2" stroke-linecap="round"><path d="M42 58 L30 34"/><path d="M42 58 L54 34"/><path d="M42 58 L42 30"/></g>
+  <circle cx="28" cy="30" r="12" fill="url(#gram)"/><circle cx="56" cy="30" r="12" fill="#5CE1F0"/><circle cx="42" cy="24" r="13" fill="#FFD166"/>
+  <circle cx="28" cy="27" r="3" fill="#fff" fill-opacity=".5"/><circle cx="56" cy="27" r="3" fill="#fff" fill-opacity=".5"/><circle cx="42" cy="21" r="3" fill="#fff" fill-opacity=".5"/>
+  <path d="M30 66 Q42 60 54 66" stroke="#FF7A1A" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M42 64 L35 56 M42 64 L49 56" stroke="#FF7A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
 function renderCats(){
   document.getElementById('cats').innerHTML=CATS.map(c=>`<button class="chip" aria-pressed="${c===cat}" onclick="setCat('${c}')">${c}</button>`).join('');
 }
@@ -176,7 +193,7 @@ function ctrl(p){
 function renderMenu(){
   const cats=cat==='Todos'?CATS.slice(1):[cat];
   document.getElementById('menu').innerHTML=cats.map(c=>`<h2>${c}</h2><div class="grid">`+P.filter(p=>p.c===c).map(p=>`
-    <div class="item"><div class="cup">${cupSVG(p.k)}</div><div class="info">
+    <div class="item"><div class="cup">${p.k==='ram'?ramoSVG():cupSVG(p.k)}</div><div class="info">
     <div class="name">${esc(p.n)}${p.t?`<span class="badge">${p.t}</span>`:''}</div><div class="desc">${esc(p.d)}</div>
     <div class="foot"><span class="price">${fmt(p.p)}</span><span id="ctl${p.id}">${ctrl(p)}</span></div></div></div>`).join('')+`</div>`).join('');
 }
